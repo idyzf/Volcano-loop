@@ -52,3 +52,31 @@ for (i in 1:length(files)) {
   dev.off()
   i=i+1
 }
+#################### naming the important genes only ##########
+for (i in 1:length(files)) {
+  statistic <- read.xlsx(files[i])
+  statistic$DEG <- "NO"
+  statistic$DEG[statistic$log2fc < j & statistic$p <.05] <- "DOWN"
+  statistic$DEG[statistic$log2fc > k & statistic$p <.06] <- "UP"
+  
+  statistic$delabel <- NA
+  statistic$delabel[statistic$DEG != "NO"] <- statistic$.y.[statistic$DEG != "NO"]
+  statistic$genelabels <- ifelse(statistic$delabel == "CDK7"
+                                    | statistic$delabel == "MGMT", statistic$delabel,  "")
+  
+  img <- ggplot(data=statistic, aes(x=log2fc, y=-log10(p), col= DEG, label=genelabels)) +
+    geom_point() + 
+    theme_minimal() +
+    geom_text_repel() +
+    geom_vline(xintercept=c(-0.48, 0.48), col="black", linetype=2) +
+    geom_hline(yintercept=-log10(0.05), col="black", linetype=2)+
+    xlab("Log2 Fold Change")+
+    ggtitle(titles[i])
+  
+  namepng<- namespng[i]
+  png(filename=namepng)
+  plot(img)
+  dev.off()
+  i=i+1
+}
+
